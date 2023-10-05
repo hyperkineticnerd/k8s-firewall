@@ -1,0 +1,56 @@
+<edit-config>
+    <target>
+        <candidate/>
+    </target>
+    <config-text>
+        <configuration-text>
+            security {
+                nat {
+                    destination {
+                        pool {{ .Target }} {
+                            address {{ .IpAddr }} port {{ .Port }};
+                        }
+                        rule-set {{ .RuleSet }} {
+                            from zone {{ .ExternalZone }};
+                            rule {{ .Name }} {
+                                match {
+                                    destination-address 0.0.0.0/0;
+                                    destination-port {
+                                        {{ .Port }}
+                                    }
+                                }
+                                then {
+                                    destination-nat {
+                                        pool {
+                                            {{ .Name }};
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                policies {
+                    from-zone {{ .ExternalZone }} to-zone {{ .InternalZone }} {
+                        policy {{ .Policy }} {
+                            match {
+                                source-address any;
+                                destination-address {{ .Target }};
+                                application {{ .Name }};
+                            }
+                            then {
+                                permit;
+                            }
+                        }
+                    }
+                }
+            }
+            applications {
+                application {{ .Name }} {
+                    protocol {{ .Proto }};
+                    destination-port {{ .Port }};
+                }
+            }
+        </configuration-text>
+    </config-text>
+</edit-config>
